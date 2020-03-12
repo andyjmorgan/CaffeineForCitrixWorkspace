@@ -9,7 +9,7 @@
       <Value Profile="(Default)">key values = https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.keys?view=netframework-4.8. The default if f15</Value>
     </Setting>
     <Setting Name="TimerIntervalSeconds" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">15</Value>
+      <Value Profile="(Default)">120</Value>
     </Setting>
   </Settings>
 </SettingsFile>

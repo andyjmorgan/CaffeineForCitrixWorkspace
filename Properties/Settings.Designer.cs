@@ -44,7 +44,7 @@ namespace CaffeineV2.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("15")]
+        [global::System.Configuration.DefaultSettingValueAttribute("120")]
         public int TimerIntervalSeconds {
             get {
                 return ((int)(this["TimerIntervalSeconds"]));
