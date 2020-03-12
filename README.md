@@ -15,6 +15,7 @@ In light of COVID-19, constant pestering and peoples desire to avoid work, I've 
 HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Citrix\ICA Client\CCM
 
 AllowLiveMonitoring: Dword: 1
+
 AllowSimulationAPI: Dword: 1
 
 3: Download the utility:
