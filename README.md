@@ -19,7 +19,7 @@ AllowSimulationAPI: Dword: 1
 
 https://github.com/andyjmorgan/CaffeineForCitrixWorkspace/raw/master/Binary/CaffeineForCitrixWorkspace.zip
 
-# 3: Run it!
+3: Run it!
 
 Then go back to doing nothing safe in the knowledge that you shouldnt get a screensaver prompt again!
 
