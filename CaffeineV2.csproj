@@ -101,5 +101,12 @@
     <Content Include="caffeine2.ico" />
     <None Include="TSTTriangle.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Binary\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"C:\Program Files\7-Zip\7z.exe" a -tzip "$(ProjectDir)binary\CaffeineForCitrixWorkspace.zip" "$(TargetDir)" 
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>
