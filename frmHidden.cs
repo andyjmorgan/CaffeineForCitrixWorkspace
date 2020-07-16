@@ -95,7 +95,7 @@ namespace CaffeineV2
                         WFICALib.ICAClient icaSession = new WFICALib.ICAClient();
                         icaSession.SetProp("OutputMode", "1");
                         icaSession.StartMonitoringCCMSession(session, true);
-                        icaSession.Session.Keyboard.SendKeyDown(Properties.Settings.Default.TimerIntervalSeconds);//(int)Keys.B);
+                        icaSession.Session.Keyboard.SendKeyDown(Properties.Settings.Default.KeyValue);//(int)Keys.B);
                         icaSession.StopMonitoringCCMSession(session);
                     }
                     catch (Exception ex)
