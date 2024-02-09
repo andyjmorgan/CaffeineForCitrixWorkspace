@@ -48,7 +48,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WfIcaLib">
-      <HintPath>..\..\..\..\..\Program Files (x86)\Citrix\ICA Client\WfIcaLib.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Citrix\ICA Client\WfIcaLib.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
   </ItemGroup>
@@ -98,11 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Caffeine.ico" />
-    <Content Include="caffeine2.ico" />
     <None Include="TSTTriangle.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Binary\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

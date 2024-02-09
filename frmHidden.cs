@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CaffeineV2
@@ -22,25 +18,17 @@ namespace CaffeineV2
 
         private bool CheckCCMRegistryKeys()
         {
-            List<string> ccmValues = new List<string>();
-            ccmValues.Add("AllowSimulationAPI");
-            ccmValues.Add("AllowLiveMonitoring");
+            List<string> ccmValues = new List<string> {"AllowSimulationAPI", "AllowLiveMonitoring"};
+
             using (var baseKey = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry32))
             {
                 var ccmKey = baseKey.OpenSubKey(CCMRegPath);
                 if (ccmKey != null)
                 {
-                    foreach (string Value in ccmValues)
-                    {
-                        if ((int)ccmKey.GetValue(Value, -1) != 1)
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
-
+                    return ccmValues.All(value => (int) ccmKey.GetValue(value, -1) == 1);
                 }
             }
+
             return false;
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -54,11 +42,13 @@ namespace CaffeineV2
                 var version = icaClient.Version;
                 var enumHandle = icaClient.EnumerateCCMSessions();
                 var sessionCount = icaClient.GetEnumNameCount(enumHandle);
+                Debug.WriteLine($"ICA client object creation successful: Version {version} / Sessions {sessionCount}");
                 icaClient.CloseEnumHandle(enumHandle);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An error occured while registering the ICA CCM Object", "Error on Startup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("An error occurred while registering the ICA CCM Object", "Error on Startup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Debug.WriteLine($"An error occurred while registering the ICA CCM Object: {ex}");
                 this.Close();
             }
 
@@ -71,7 +61,6 @@ namespace CaffeineV2
 
             tmrTick.Start();
             this.Visible = false;
-
         }
 
         private void tmrTick_Tick(object sender, EventArgs e)
@@ -83,7 +72,7 @@ namespace CaffeineV2
                 var icaClient = new WFICALib.ICAClient();
                 var enumHandle = icaClient.EnumerateCCMSessions();
                 var sessionCount = icaClient.GetEnumNameCount(enumHandle);
-                Debug.WriteLine("Found {0} sessions", sessionCount);
+                Debug.WriteLine($"Found {sessionCount} sessions");
                 int itemCount = 0;
 
                 while (itemCount < sessionCount)
@@ -92,7 +81,7 @@ namespace CaffeineV2
                     {
                         Debug.WriteLine("Sending keepalive to session: {0}", itemCount);
                         string session = icaClient.GetEnumNameByIndex(enumHandle, itemCount);
-                        WFICALib.ICAClient icaSession = new WFICALib.ICAClient();
+                        var icaSession = new WFICALib.ICAClient();
                         icaSession.SetProp("OutputMode", "1");
                         icaSession.StartMonitoringCCMSession(session, true);
                         icaSession.Session.Keyboard.SendKeyDown(Properties.Settings.Default.KeyValue);//(int)Keys.B);
@@ -100,19 +89,18 @@ namespace CaffeineV2
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine("Keepalive to session: {0} failed: {1}", itemCount, ex.ToString());
+                        Debug.WriteLine($"Keepalive to session: {itemCount} failed: {ex}");
                     }
                     itemCount += 1;
 
                 }
+
                 icaClient.CloseEnumHandle(enumHandle);
             }
             catch(Exception ex)
             {
-                Debug.WriteLine("Timer tick exception: {0}", ex.ToString());
+                Debug.WriteLine($"Timer tick exception: {ex}");
             }
-           
-
         }
 
         private void frmHidden_Shown(object sender, EventArgs e)
@@ -122,12 +110,11 @@ namespace CaffeineV2
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
-
         }
 
         private void tsmiAbout_Click(object sender, EventArgs e)
         {
-            frmAbout fa = new frmAbout();
+            var fa = new frmAbout();
             fa.Show();
         }
 
@@ -137,5 +124,3 @@ namespace CaffeineV2
         }
     }
 }
-
-
