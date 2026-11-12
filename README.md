@@ -1,5 +1,7 @@
 ﻿# Caffeine For Citrix Workspace
 
+This fork targets 64-bit Citrix Workspace.
+
 http://andrewmorgan.ie/2012/07/caffeine-for-citrix-receiver/
 
 Remember this Citrix utility i wrote 8 years ago? no? Me neither, or at least I wouldnt, if you would stop emailing me about it.
@@ -8,19 +10,15 @@ In light of COVID-19, constant pestering and peoples desire to avoid work, I've 
 
 # You'll need to do four things:
 
-1: .Net Framework 4.7.2
+1: .NET Framework 4.8.1 for the included x64 build
 
-2:  Create the following two, DWORD values in the following key:
-
-HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Citrix\ICA Client\CCM
-
-AllowLiveMonitoring: Dword: 1
-
-AllowSimulationAPI: Dword: 1
+2: Open PowerShell as Administrator and run `./caffeinev2_fix.ps1` (included in the download).
+The script sets `AllowLiveMonitoring` and `AllowSimulationAPI` to DWORD `1` under
+`HKLM\SOFTWARE\Citrix\ICA Client\CCM` in both the 32-bit and 64-bit registry views.
 
 3: Download the utility:
 
-https://github.com/andyjmorgan/CaffeineForCitrixWorkspace/raw/master/Binary/CaffeineForCitrixWorkspace.zip
+https://github.com/efnikolas/CaffeineForCitrixWorkspace/raw/master/Binary/CaffeineForCitrixWorkspace-x64.zip
 
 4: Run it!
 
