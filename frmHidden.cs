@@ -9,27 +9,25 @@ namespace CaffeineV2
 {
     public partial class frmHidden : Form
     {
-        private const string CCMRegPath = @"SOFTWARE\WOW6432Node\Citrix\ICA Client\CCM";
+        private const string CCMRegPath = @"SOFTWARE\Citrix\ICA Client\CCM";
 
         public frmHidden()
         {
             InitializeComponent();
         }
 
-        private bool CheckCCMRegistryKeys()
+        private static bool CheckCCMRegistryKeys()
         {
             List<string> ccmValues = new List<string> {"AllowSimulationAPI", "AllowLiveMonitoring"};
 
-            using (var baseKey = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry32))
+            var view = Environment.Is64BitProcess
+                ? Microsoft.Win32.RegistryView.Registry64
+                : Microsoft.Win32.RegistryView.Registry32;
+            using (var baseKey = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, view))
+            using (var ccmKey = baseKey.OpenSubKey(CCMRegPath))
             {
-                var ccmKey = baseKey.OpenSubKey(CCMRegPath);
-                if (ccmKey != null)
-                {
-                    return ccmValues.All(value => (int) ccmKey.GetValue(value, -1) == 1);
-                }
+                return ccmKey != null && ccmValues.All(value => ccmKey.GetValue(value) is int enabled && enabled == 1);
             }
-
-            return false;
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -47,15 +45,18 @@ namespace CaffeineV2
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An error occurred while registering the ICA CCM Object", "Error on Startup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string architecture = Environment.Is64BitProcess ? "64-bit" : "32-bit";
+                MessageBox.Show($"Unable to create the ICA CCM object. This build requires {architecture} Citrix Workspace. Check that the installed client matches.", "Error on Startup", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.WriteLine($"An error occurred while registering the ICA CCM Object: {ex}");
                 this.Close();
+                return;
             }
 
             if (!CheckCCMRegistryKeys())
             {
-                MessageBox.Show(@"The CCM registry DWORDS (AllowSimulationAPI & AllowLiveMonitoring) are missing from HKLM:\" + CCMRegPath, "Missing CCM values detected on Startup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("The CCM registry values AllowSimulationAPI and AllowLiveMonitoring must both be DWORD 1. Run caffeinev2_fix.ps1 as Administrator, then restart the app.", "Missing CCM values detected on Startup", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
+                return;
             }
             Debug.WriteLine("Starting Timer");
 

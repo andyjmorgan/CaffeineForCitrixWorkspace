@@ -1,18 +1,27 @@
-# Caffeine for Citrix Workspace (x64)
+# Caffeine for Citrix Workspace
 
-Sends a configurable keystroke to Citrix sessions at a fixed interval. This fork builds the original [Andrew Morgan utility](https://github.com/andyjmorgan/CaffeineForCitrixWorkspace) for 64-bit Citrix Workspace.
+Sends a configurable keystroke to Citrix sessions at a fixed interval. This fork provides x86 and x64 builds of [Andrew Morgan's utility](https://github.com/andyjmorgan/CaffeineForCitrixWorkspace).
+
+## Choose a build
+
+Match the **installed Citrix Workspace client**, even on 64-bit Windows.
+
+| Citrix Workspace | Download | Executable |
+| --- | --- | --- |
+| 32-bit | [x86 package](https://github.com/efnikolas/CaffeineForCitrixWorkspace/raw/master/Binary/CaffeineForCitrixWorkspace-x86.zip) | `CaffeineV2-x86.exe` |
+| 64-bit | [x64 package](https://github.com/efnikolas/CaffeineForCitrixWorkspace/raw/master/Binary/CaffeineForCitrixWorkspace-x64.zip) | `CaffeineV2-x64.exe` |
+
+Each build loads the Citrix ICA COM component of the same architecture.
 
 ## Requirements
 
-- 64-bit Windows and 64-bit Citrix Workspace installed locally.
-- .NET Framework 4.8.1 for the packaged build.
-- Administrator access to run the registry setup script.
-
-The x64 executable requires the 64-bit Citrix ICA COM component. The registry script enables the CCM APIs; it does not install or register that component.
+- Windows with Citrix Workspace installed locally.
+- .NET Framework 4.8.1.
+- Administrator access for the registry setup script.
 
 ## Setup
 
-1. [Download the x64 package](https://github.com/efnikolas/CaffeineForCitrixWorkspace/raw/master/Binary/CaffeineForCitrixWorkspace-x64.zip) and extract it.
+1. Download the matching package above and extract it.
 2. Open PowerShell **as Administrator**, change to the extracted folder, and run:
 
    ```powershell
@@ -20,29 +29,26 @@ The x64 executable requires the 64-bit Citrix ICA COM component. The registry sc
    ```
 
 3. Check that the script reports `1` for both `AllowLiveMonitoring` and `AllowSimulationAPI`.
-4. Run `CaffeineV2-x64.exe`. Keep `CaffeineV2-x64.exe.config` beside it.
+4. Run the extracted executable. Keep its `.exe.config` file beside it.
 
 The app runs in the notification area. Right-click its icon and choose **Exit** to stop it.
 
 ## Registry setup
 
-`caffeinev2_fix.ps1` requires an elevated PowerShell session and sets these DWORD values to `1`:
-
-- `AllowLiveMonitoring`
-- `AllowSimulationAPI`
-
-It writes both registry views on 64-bit Windows:
+Both packages include the same `caffeinev2_fix.ps1`. It requires an elevated PowerShell session and sets `AllowLiveMonitoring` and `AllowSimulationAPI` to DWORD `1` in both registry views on 64-bit Windows:
 
 | View | Key |
 | --- | --- |
 | 64-bit | `HKLM\SOFTWARE\Citrix\ICA Client\CCM` |
 | 32-bit | `HKLM\SOFTWARE\WOW6432Node\Citrix\ICA Client\CCM` |
 
-The script refuses to run without Administrator rights. It supports Windows PowerShell 5.1 and PowerShell 7.
+On 32-bit Windows it writes only the 32-bit view, under `HKLM\SOFTWARE\Citrix\ICA Client\CCM`. Each executable checks the view matching its process architecture.
+
+The script supports Windows PowerShell 5.1 and PowerShell 7. It enables the CCM APIs; it does not install or register the Citrix ICA COM component.
 
 ## Configuration
 
-Exit the app before editing `CaffeineV2-x64.exe.config`, then restart it.
+Exit the app before editing the matching `CaffeineV2-x86.exe.config` or `CaffeineV2-x64.exe.config`, then restart it.
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
@@ -51,16 +57,27 @@ Exit the app before editing `CaffeineV2-x64.exe.config`, then restart it.
 
 ## Build
 
-Install Visual Studio or its Build Tools with MSBuild and the .NET Framework 4.8.1 targeting pack. The project references the interop library from the local 64-bit Workspace installation at `C:\Program Files\Citrix\ICA Client\WFICALib.dll`.
+On a 64-bit Windows machine, install Visual Studio or Build Tools with MSBuild and the .NET Framework 4.8.1 targeting pack. Citrix Workspace supplies `WFICALib.dll`; the project looks for it in the installed client's `ICA Client` folder under Program Files or Program Files (x86).
 
-From a Developer PowerShell window in the repository folder:
+Run this from the repository folder to build and package both architectures:
 
 ```powershell
-MSBuild.exe .\CaffeineV2.csproj /t:Rebuild /p:Configuration=Release /p:TargetFrameworkVersion=v4.8.1 /p:AssemblyName=CaffeineV2-x64 /p:OutputPath=bin\x64\Release\ /p:PostBuildEvent=
+.\build.ps1
 ```
 
-The executable and its config are written to `bin\x64\Release`. The empty `PostBuildEvent` disables the upstream packaging command, which requires 7-Zip.
+The script finds MSBuild through PATH or the Visual Studio installer. You can supply its location with `-MSBuildPath`.
 
-## Startup error
+To build one architecture from Developer PowerShell:
 
-If the app reports an error registering the ICA CCM object, check that the installed Citrix Workspace client is 64-bit. The x64 build cannot load a 32-bit ICA COM component, and changing the CCM registry values does not resolve an architecture mismatch.
+```powershell
+MSBuild.exe .\CaffeineV2.sln /t:Rebuild /p:Configuration=Release /p:Platform=x86
+MSBuild.exe .\CaffeineV2.sln /t:Rebuild /p:Configuration=Release /p:Platform=x64
+```
+
+Executables and configs are written to `bin\x86\Release` and `bin\x64\Release`. `build.ps1` writes the ZIP packages to `Binary`. Both builds embed the COM type definitions from `WFICALib.dll`. To use a copy outside the installation folder, pass `/p:CitrixInteropPath="C:\path\to\WFICALib.dll"` to MSBuild.
+
+## Startup errors
+
+If the app cannot create the ICA CCM object, check that the executable matches the installed Citrix client's architecture. The registry script cannot fix an architecture mismatch or a missing COM component.
+
+If the app reports missing CCM values, run `caffeinev2_fix.ps1` as Administrator and restart the app.

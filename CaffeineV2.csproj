@@ -3,31 +3,32 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <ProjectGuid>{6AD136C0-7EB4-4C50-ABF7-4A6DEA66E372}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>CaffeineV2</RootNamespace>
-    <AssemblyName>CaffeineV2</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <AssemblyName>CaffeineV2-$(Platform)</AssemblyName>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <PlatformTarget>$(Platform)</PlatformTarget>
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+    <CitrixInteropPath Condition="'$(CitrixInteropPath)' == '' and Exists('$(ProgramW6432)\Citrix\ICA Client\WFICALib.dll')">$(ProgramW6432)\Citrix\ICA Client\WFICALib.dll</CitrixInteropPath>
+    <CitrixInteropPath Condition="'$(CitrixInteropPath)' == ''">$(MSBuildProgramFiles32)\Citrix\ICA Client\WFICALib.dll</CitrixInteropPath>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -48,7 +49,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WfIcaLib">
-      <HintPath>C:\Program Files\Citrix\ICA Client\WFICALib.dll</HintPath>
+      <HintPath>$(CitrixInteropPath)</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
   </ItemGroup>
@@ -101,8 +102,8 @@
     <None Include="TSTTriangle.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>"C:\Program Files\7-Zip\7z.exe" a -tzip "$(ProjectDir)binary\CaffeineForCitrixWorkspace.zip" "$(TargetDir)" 
-</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="ValidateBuildInputs" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(Platform)' != 'x86' and '$(Platform)' != 'x64'" Text="Select Platform=x86 or Platform=x64." />
+    <Error Condition="!Exists('$(CitrixInteropPath)')" Text="WFICALib.dll was not found. Install Citrix Workspace or set CitrixInteropPath to its interop DLL." />
+  </Target>
 </Project>
